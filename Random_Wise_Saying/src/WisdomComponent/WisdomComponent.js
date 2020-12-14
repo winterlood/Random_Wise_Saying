@@ -13,6 +13,14 @@ import {
 } from 'react-native';
 
 const WisdomComponent = ({wise, type, refresh}) => {
+  const [renderRefresh, setRenderRefresh] = useState(false);
+  useEffect(() => {
+    console.log('new Wise');
+    setRenderRefresh(false);
+    setInterval(() => {
+      setRenderRefresh(true);
+    }, 2000);
+  }, [wise]);
   return (
     <SafeAreaView>
       <ImageBackground
@@ -28,11 +36,14 @@ const WisdomComponent = ({wise, type, refresh}) => {
             <Text></Text>
             <Text style={styles.wiseAuthor}> - {wise?.author} -</Text>
           </View>
-          {type === 'Main' ? (
+          {type === 'Main' && renderRefresh ? (
             <View>
               <TouchableOpacity
                 style={styles.refershDiv}
-                onPress={() => refresh()}>
+                onPress={() => {
+                  setRenderRefresh(false);
+                  refresh();
+                }}>
                 <Image
                   source={require('./refresh.png')}
                   style={styles.refreshIcon}

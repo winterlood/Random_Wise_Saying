@@ -4,6 +4,15 @@ import {StyleSheet, Text, View} from 'react-native';
 
 import wise from './../../wise.json';
 import WisdomComponent from './../WisdomComponent/WisdomComponent';
+import {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+} from '@react-native-firebase/admob';
+// const adUnitId = __DEV__
+//   ? TestIds.INTERSTITIAL
+//   : 'ca-app-pub-8356725717508400/1561891319';
+const adUnitId = 'ca-app-pub-8356725717508400/1561891319';
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -12,6 +21,8 @@ function getRandomInt(min, max) {
 
 const MainComponent = () => {
   const [nowWise, setNowWise] = useState();
+  const [count, setCount] = useState(1);
+
   const resetWise = () => {
     var nowWise = wise[getRandomInt(0, 100)];
     var nowWiseTexts = nowWise.message.split('.');
@@ -24,10 +35,43 @@ const MainComponent = () => {
       imgSrc: randomImg,
     });
   };
+
+  const upCount = () => {
+    setCount(count + 1);
+  };
+
+  const checkAd = () => {
+    if (count > 5 && count % 10 === 0) {
+      const interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
+        requestNonPersonalizedAdsOnly: true,
+      });
+      interstitialAd.onAdEvent((type, error) => {
+        console.log('New advert event: ', type);
+        if (type === AdEventType.LOADED) {
+          // interstitialAd.show();
+          interstitialAd.show();
+          console.log('show');
+        }
+      });
+      interstitialAd.load();
+    }
+  };
+
+  const upCountLogic = async () => {
+    console.log(count);
+    await checkAd();
+    resetWise();
+  };
+
   useEffect(() => {
     resetWise();
   }, []);
-  return <WisdomComponent wise={nowWise} type={'Main'} refresh={resetWise} />;
+
+  useEffect(() => {
+    upCountLogic();
+  }, [count]);
+
+  return <WisdomComponent wise={nowWise} type={'Main'} refresh={upCount} />;
 };
 
 export default MainComponent;
